@@ -41,7 +41,7 @@
       "dist/credentials/FractalForgeApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/Fractal/FractalForge.node.js"
+      "dist/nodes/FractalForge/FractalForge.node.js"
     ]
   },
   "devDependencies": {
