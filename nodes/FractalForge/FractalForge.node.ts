@@ -7,7 +7,7 @@ import {
 	JsonObject,
 	// NodeParameterValue,
 	IRequestOptions,
-	IHttpRequestMethods, NodeConnectionType,
+	IHttpRequestMethods,
 } from 'n8n-workflow';
 import { NodeApiError, NodeOperationError } from 'n8n-workflow';
 import { ILoadOptionsFunctions } from 'n8n-workflow/dist/Interfaces';
@@ -38,8 +38,10 @@ export class FractalForge implements INodeType {
 		defaults: {
 			name: 'Fractal Forge Action',
 		},
-		inputs: [NodeConnectionType.Main],
-		outputs: [NodeConnectionType.Main],
+		// @ts-ignore
+		inputs: ['main'],
+		// @ts-ignore
+		outputs: ['main'],
 		credentials: [
 			{
 				name: 'fractalForgeApi',
