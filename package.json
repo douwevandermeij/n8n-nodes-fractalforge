@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-fractalforge",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Fractal Forge applications",
   "keywords": [
     "n8n-community-node-package",
