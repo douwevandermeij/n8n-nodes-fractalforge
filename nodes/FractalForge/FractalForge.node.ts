@@ -201,7 +201,7 @@ export class FractalForge implements INodeType {
 	methods = {
 		loadOptions: {
 			async getFractalEntities(this: ILoadOptionsFunctions) {
-				const credentials = await this.getCredentials('fractalApi');
+				const credentials = await this.getCredentials('fractalForgeApi');
 				const apiEndpoint = credentials.apiEndpoint;
 				const apiKey = credentials.apiKey;
 
@@ -228,10 +228,10 @@ export class FractalForge implements INodeType {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
 
-		// const credentials = await this.getCredentials('fractalApi');
+		// const credentials = await this.getCredentials('fractalForgeApi');
 		// const baseUrl = `https://${credentials.accountName}.fractalForge.com/api/v2`;
 
-		const credentials = await this.getCredentials('fractalApi');
+		const credentials = await this.getCredentials('fractalForgeApi');
 		const apiEndpoint = credentials.apiEndpoint;
 		const apiKey = credentials.apiKey;
 
