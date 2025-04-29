@@ -26,12 +26,12 @@ export class FractalForgeApi implements ICredentialType {
 			default: 'http://127.0.0.1:8000',
 			required: true,
 		},
-		{
-			displayName: 'Label',
-			name: 'api',
-			type: 'string',
-			default: 'My Fractal Forge Application',
-		},
+		// {
+		// 	displayName: 'Label',
+		// 	name: 'api',
+		// 	type: 'string',
+		// 	default: 'My Fractal Forge Application',
+		// },
 	];
 
 	authenticate: IAuthenticateGeneric = {

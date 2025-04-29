@@ -454,14 +454,17 @@ export class FractalForge implements INodeType {
 
 				const options = {
 					method: requestMethod,
-					body,
-					qs,
+					qs: qs,
 					uri: `${apiEndpoint}/${endpoint}`,
 					headers: {
 						Authorization: `Bearer ${apiKey}`,
 					},
 					json: true,
-				} satisfies IRequestOptions;
+				} as IRequestOptions;
+
+				if (requestMethod !== 'GET') {
+					options.body = body;
+				}
 
 				let responseData;
 
