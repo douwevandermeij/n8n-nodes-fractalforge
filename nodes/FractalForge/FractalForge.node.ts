@@ -33,7 +33,7 @@ export class FractalForge implements INodeType {
 		icon: 'file:fractal_forge.svg',
 		group: ['input'],
 		version: 1,
-		subtitle: '={{$parameter["entity"] + ": " + $parameter["operation"]}} object',
+		subtitle: '={{$parameter["collection"] + ": " + $parameter["operation"]}} object',
 		description: 'Retrieve data from FractalForge API',
 		defaults: {
 			name: 'Fractal Forge Action',
@@ -137,15 +137,15 @@ export class FractalForge implements INodeType {
 			//         properties
 			// ----------------------------------
 			{
-				displayName: 'Entity Name or ID',
-				name: 'entity',
+				displayName: 'Entity Collection Name or ID',
+				name: 'collection',
 				type: 'options',
 				typeOptions: {
 					loadOptionsMethod: 'getFractalEntities',
 				},
 				required: true,
 				default: '',
-				description: 'Select an entity. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
+				description: 'Select an entity collection. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>.',
 			},
 			{
 				displayName: 'Object ID',
@@ -233,8 +233,12 @@ export class FractalForge implements INodeType {
 		// const credentials = await this.getCredentials('fractalForgeApi');
 		// const baseUrl = `https://${credentials.accountName}.fractalForge.com/api/v2`;
 
+		const removeTrailingSlash = (url: string): string => {
+			return url.endsWith('/') ? url.slice(0, -1) : url;
+		};
+
 		const credentials = await this.getCredentials('fractalForgeApi');
-		const apiEndpoint = credentials.apiEndpoint;
+		const apiEndpoint = removeTrailingSlash(credentials.apiEndpoint as string);
 		const apiKey = credentials.apiKey;
 
 		// For Post
@@ -246,7 +250,7 @@ export class FractalForge implements INodeType {
 			try {
 				const resource = this.getNodeParameter('resource', i);
 				const operation = this.getNodeParameter('operation', i);
-				const entityPath = this.getNodeParameter('entity', i) as string;
+				const entityCollection = this.getNodeParameter('collection', i) as string;
 
 				let requestMethod: IHttpRequestMethods = 'GET';
 				let endpoint = '';
@@ -260,7 +264,7 @@ export class FractalForge implements INodeType {
 
 						requestMethod = 'GET';
 
-						endpoint = entityPath;
+						endpoint = entityCollection;
 					} else if (operation === 'get') {
 						// ----------------------------------
 						//         get
@@ -270,7 +274,7 @@ export class FractalForge implements INodeType {
 
 						const objectId = this.getNodeParameter('objectId', i, '') as IDataObject;
 
-						endpoint = `${entityPath}/${objectId}`;
+						endpoint = `${entityCollection}/${objectId}`;
 					} else {
 						throw new NodeOperationError(
 							this.getNode(),
@@ -306,7 +310,7 @@ export class FractalForge implements INodeType {
 
 						const objectId = this.getNodeParameter('objectId', i, '') as string;
 
-						endpoint = objectId.trim() !== '' ? `${entityPath}/${objectId}` : entityPath;
+						endpoint = objectId.trim() !== '' ? `${entityCollection}/${objectId}` : entityCollection;
 					} else if (operation === 'update') {
 						// ----------------------------------
 						//         update
@@ -334,7 +338,7 @@ export class FractalForge implements INodeType {
 
 						const objectId = this.getNodeParameter('objectId', i, '') as IDataObject;
 
-						endpoint = `${entityPath}/${objectId}`;
+						endpoint = `${entityCollection}/${objectId}`;
 					} else if (operation === 'delete') {
 						// ----------------------------------
 						//         delete
@@ -360,7 +364,7 @@ export class FractalForge implements INodeType {
 
 						const objectId = this.getNodeParameter('objectId', i, '') as IDataObject;
 
-						endpoint = `${entityPath}/${objectId}`;
+						endpoint = `${entityCollection}/${objectId}`;
 					} else {
 						throw new NodeOperationError(
 							this.getNode(),
