@@ -99,6 +99,18 @@ export class FractalForge implements INodeType {
 						description: 'Delete an object',
 						action: 'Delete an object',
 					},
+					{
+						name: 'Custom (Collection)',
+						value: 'custom_collection_command',
+						description: 'Custom command on a collection',
+						action: 'Custom command on a collection',
+					},
+					{
+						name: 'Custom (Object)',
+						value: 'custom_object_command',
+						description: 'Custom command on an object',
+						action: 'Custom command on an object',
+					},
 				],
 				default: 'create',
 			},
@@ -128,6 +140,18 @@ export class FractalForge implements INodeType {
 						value: 'get',
 						description: 'Get an object',
 						action: 'Get an object',
+					},
+					{
+						name: 'Custom (Collection)',
+						value: 'custom_collection_query',
+						description: 'Custom query on a collection',
+						action: 'Custom query on a collection',
+					},
+					{
+						name: 'Custom (Object)',
+						value: 'custom_object_query',
+						description: 'Custom query on an object',
+						action: 'Custom query on an object',
 					},
 				],
 				default: 'get',
@@ -171,10 +195,40 @@ export class FractalForge implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ['command', 'query'],
-						operation: ['update', 'delete', 'get'],
+						operation: ['update', 'delete', 'get', 'custom_object_command', 'custom_object_query'],
 					},
 				},
 				placeholder: '00000000-0000-0000-0000-000000000000',
+			},
+			{
+				displayName: 'Custom Command',
+				name: 'customCommand',
+				description: 'The name of the custom command',
+				type: 'string',
+				default: '',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['command'],
+						operation: ['custom_object_command', 'custom_collection_command'],
+					},
+				},
+				placeholder: 'custom-command',
+			},
+			{
+				displayName: 'Custom Query',
+				name: 'customQuery',
+				description: 'The name of the custom query',
+				type: 'string',
+				default: '',
+				required: true,
+				displayOptions: {
+					show: {
+						resource: ['query'],
+						operation: ['custom_object_query', 'custom_collection_query'],
+					},
+				},
+				placeholder: 'custom-query',
 			},
 			{
 				displayName: 'JSON',
@@ -257,15 +311,21 @@ export class FractalForge implements INodeType {
 				body = {};
 				qs = {};
 				if (resource === 'query') {
-					if (operation === 'list') {
+					if (operation === 'list' || operation === 'custom_collection_query') {
 						// ----------------------------------
 						//         list
 						// ----------------------------------
 
 						requestMethod = 'GET';
 
+						const customQuery = this.getNodeParameter('customQuery', i, '') as IDataObject;
+
 						endpoint = entityCollection;
-					} else if (operation === 'get') {
+
+						if (customQuery) {
+							endpoint = `${endpoint}/${customQuery}`;
+						}
+					} else if (operation === 'get' || operation === 'custom_object_query') {
 						// ----------------------------------
 						//         get
 						// ----------------------------------
@@ -273,8 +333,12 @@ export class FractalForge implements INodeType {
 						requestMethod = 'GET';
 
 						const objectId = this.getNodeParameter('objectId', i, '') as IDataObject;
+						const customQuery = this.getNodeParameter('customQuery', i, '') as IDataObject;
 
 						endpoint = `${entityCollection}/${objectId}`;
+						if (customQuery) {
+							endpoint = `${endpoint}/${customQuery}`;
+						}
 					} else {
 						throw new NodeOperationError(
 							this.getNode(),
@@ -365,6 +429,39 @@ export class FractalForge implements INodeType {
 						const objectId = this.getNodeParameter('objectId', i, '') as IDataObject;
 
 						endpoint = `${entityCollection}/${objectId}`;
+					} else if (operation === 'custom_object_command' || operation === 'custom_collection_command') {
+						// ----------------------------------
+						//         custom
+						// ----------------------------------
+
+						requestMethod = 'POST';
+
+						const properties = this.getNodeParameter('properties', i, {}) as IDataObject;
+
+						for (const key of Object.keys(properties)) {
+							if (
+								key === 'customProperties' &&
+								(properties.customProperties as IDataObject).property !== undefined
+							) {
+								for (const customProperty of (properties.customProperties as IDataObject)
+									.property! as CustomProperty[]) {
+									qs[customProperty.name] = customProperty.value;
+								}
+							} else {
+								qs[key] = properties[key];
+							}
+						}
+
+						const objectId = this.getNodeParameter('objectId', i, '') as IDataObject;
+						const customCommand = this.getNodeParameter('customCommand', i, '') as IDataObject;
+
+						endpoint = entityCollection;
+						if (operation === 'custom_object_command') {
+							endpoint = `${endpoint}/${objectId}`;
+						}
+						if (customCommand) {
+							endpoint = `${endpoint}/${customCommand}`;
+						}
 					} else {
 						throw new NodeOperationError(
 							this.getNode(),
